@@ -2,9 +2,14 @@ from ast import Try
 import requests as req
 import os
 
-api_key = os.environ['AZURE_TEXTANA_KEY']
+api_key = os.getenv('AZURE_TEXTANA_KEY',None)
 
 async def call_text_analytics_api(document,  endpoint, headers=None):
+
+    if api_key == None:
+        print("Configure key please")
+        return {"message":"system error"}
+
     if headers is None:
         headers = { "Ocp-Apim-Subscription-Key": api_key,
                     "Content-Type": "application/json",
