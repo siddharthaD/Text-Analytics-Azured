@@ -10,10 +10,17 @@ from fastapi.encoders import jsonable_encoder
 import logging
 
 from opencensus.ext.azure.log_exporter import AzureLogHandler
-logger.addHandler(AzureLogHandler(connection_string='InstrumentationKey={}'.format(utils.log_key)))
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
+#if utils.log_key == None:
+#    print("Configure log please")
+#else:
+#    lv_intkey = 'InstrumentationKey={}'.format(utils.log_key)
+#    print(lv_intkey)
+#    logger.addHandler(AzureLogHandler(connection_string=lv_intkey))
+logger.addHandler(AzureLogHandler())
+
 class Course(BaseModel):
     name: str
     description: Optional[str] = None
@@ -118,17 +125,18 @@ async def analyze_text(text: Model):
         try:
             response["sentiment"].append(doc_senti[i]['sentiment'])
             response["keyphrases"].append(doc_keyphrases[i]['keyPhrases'])
+
+            log_data = {
+                "custom_dimensions":
+                {
+                    "text": text.text_to_analyze[i].text,
+                    "text_sentiment": doc_senti[i]['sentiment'],
+                    "text_keyphrases": doc_keyphrases[i]['keyPhrases']
+                }
+            }
+            logger.info('Text Processed Succesfully', extra=log_data)
         except:
             print( "No response {1}",i)
 
-    log_data = {
-                "custom_dimensions":
-                {
-                    "text": text.text_to_analyze[i],
-                    "text_sentiment": sentiment["documents"][0]["sentiment"],
-                    "text_keyphrases": keyphrases["documents"][0]["keyPhrases"]
-                }
-            }
-            
-    logger.info('Text Processed Succesfully', extra=log_data)
+    
     return response
