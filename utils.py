@@ -3,6 +3,7 @@ import requests as req
 import os
 
 api_key = os.getenv('AZURE_TEXTANA_KEY',None)
+log_key = os.getenv('AZURE_TEXTLOG_KEY',None)
 
 async def call_text_analytics_api(document,  endpoint, headers=None):
 

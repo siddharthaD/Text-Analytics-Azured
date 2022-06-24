@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from urllib import response
 from fastapi import FastAPI
 from typing import Optional
@@ -6,7 +7,13 @@ from fastapi import BackgroundTasks
 import utils
 import time, asyncio
 from fastapi.encoders import jsonable_encoder
+import logging
 
+from opencensus.ext.azure.log_exporter import AzureLogHandler
+logger.addHandler(AzureLogHandler(connection_string='InstrumentationKey={}'.format(utils.log_key)))
+
+logger = logging.getLogger(__name__)
+logger.setLevel(10)
 class Course(BaseModel):
     name: str
     description: Optional[str] = None
@@ -114,4 +121,14 @@ async def analyze_text(text: Model):
         except:
             print( "No response {1}",i)
 
+    log_data = {
+                "custom_dimensions":
+                {
+                    "text": text.text_to_analyze[i],
+                    "text_sentiment": sentiment["documents"][0]["sentiment"],
+                    "text_keyphrases": keyphrases["documents"][0]["keyPhrases"]
+                }
+            }
+            
+    logger.info('Text Processed Succesfully', extra=log_data)
     return response
