@@ -42,7 +42,7 @@ course_items = [{"course_name":"python"}, {"course_name":"NodeJS"}, {"course_nam
 @app.post("/courses/")
 def create_course(course: Course):
     course_items.append(course)
-    return course
+    return {"course":course,"message":"Successfully added the course"}
 
 @app.get("/")
 def root():
